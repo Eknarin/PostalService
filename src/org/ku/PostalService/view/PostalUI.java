@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -57,6 +59,11 @@ public class PostalUI extends JFrame implements Runnable {
 	private JOptionPane alertPane;
 	private Timer timer;
 	private JProgressBar progressbar;
+	
+	// An Action is an object that encapsulates an ActionListener.
+	// an Action can have state and you can invoke it.
+	Action searchAction;
+	
 
 	/*
 	 * constructor
@@ -88,8 +95,7 @@ public class PostalUI extends JFrame implements Runnable {
 		progressbar.setValue(0);
 		progressbar.setVisible(false);
 
-		searchBtn = new JButton("SEARCH");
-		searchBtn.addActionListener(new ActionListener() {
+		searchAction = new AbstractAction( ) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				progressbar.setVisible(true);
@@ -98,7 +104,12 @@ public class PostalUI extends JFrame implements Runnable {
 				location.execute();
 				// searchBtn.setEnabled(false);
 			}
-		});
+		};
+
+		
+		searchBtn = new JButton("SEARCH");
+		searchBtn.addActionListener( searchAction );
+				
 	}
 
 	/*
@@ -196,21 +207,21 @@ public class PostalUI extends JFrame implements Runnable {
 
 			Table[] result = null;
 
-			timer = new Timer(12000, new ActionListener() {
+			timer = new Timer(120000, new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					location.cancel(true);
+					System.out.println("timeout");
 					String message = "It takes a long time to find the Result\n" 
-									+ "Do you want to Retry or Exit?\n"
-									+"Hint : You might take a mistake, Please recorrect the district";
+									+ "Do you want to Retry or Exit?\n";
 					String caution = "Connection Timeout";
 					int n = createAlert(message, caution);
 					timer.stop();
 					if (n == JOptionPane.YES_OPTION) {
 						System.exit(0);
 					} else {
-						return;
+						searchAction.actionPerformed( null );
 					}
 				}
 			});
